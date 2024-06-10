@@ -6,9 +6,8 @@ import { LoginDto } from './dtos/LoginDto';
 export class LoginController {
   constructor(private readonly loginService: LoginService) {}
   @Post()
-  async login(@Body() loginDto: any, @Res() res): Promise<any> {
+  async login(@Body() loginDto: LoginDto, @Res() res): Promise<any> {
     const response = await this.loginService.login(loginDto);
-    console.log(JSON.stringify(response));
     return res.status(HttpStatus.OK).json(response);
   }
 }
