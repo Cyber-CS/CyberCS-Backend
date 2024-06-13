@@ -6,7 +6,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { SearchService } from './search.service';
-import { SearchDto } from './dtos/SearchDto';
+import { SearchDto } from '../../dtos/SearchDto';
 
 @Controller('search')
 export class SearchController {
@@ -14,10 +14,7 @@ export class SearchController {
   @Post()
   async search(@Body() searchDto: SearchDto, @Res() res): Promise<any> {
     const response = await this.searchService.search(searchDto);
-    const jsonResponse = JSON.stringify({
-      id: '1',
-      response,
-    });
+    const jsonResponse = JSON.stringify(response);
     return res.status(HttpStatus.OK).send(jsonResponse);
   }
 }
