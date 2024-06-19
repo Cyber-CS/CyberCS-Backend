@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { Result } from 'src/modules/search/search.service';
 import { v4 as uuidv4 } from 'uuid';
 export type SearchDocument = Search & Document;
 
@@ -25,6 +26,9 @@ export class Search {
 
   @Prop()
   owner: string;
+
+  @Prop()
+  response: Result[];
 }
 
 export const SearchSchema = SchemaFactory.createForClass(Search);
