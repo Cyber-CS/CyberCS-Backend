@@ -6,14 +6,17 @@ import { MaliciousIntentModule } from 'src/modules/malicious-intent/malicious-in
 import { MaliciousIntentService } from 'src/modules/malicious-intent/malicious-intent.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Search, SearchSchema } from 'src/schemas/management/search.schema';
+import { EncryptionModule } from '../encryption/encryption.module';
+import { EncryptionService } from '../encryption/encryption.service';
 
 @Module({
   imports: [
     HttpModule,
     MaliciousIntentModule,
+    EncryptionModule,
     MongooseModule.forFeature([{ name: Search.name, schema: SearchSchema }]),
   ],
   controllers: [SearchController],
-  providers: [SearchService, MaliciousIntentService],
+  providers: [SearchService, MaliciousIntentService,EncryptionService],
 })
 export class SearchModule {}

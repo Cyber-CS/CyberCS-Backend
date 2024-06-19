@@ -15,7 +15,7 @@ export class ManagementService {
   async saveUser(userDto: UserDto): Promise<any> {
     const user = new this.userModel(
       Object.assign(userDto, {
-        password: bcrypt.hashSync(userDto.password, process.env.SALT),
+        password: bcrypt.hashSync(userDto.password, Number(process.env.SALT)),
       }),
     );
     return user.save();
