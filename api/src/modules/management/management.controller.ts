@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Query, Res } from '@nestjs/common';
 import { ManagementService } from './management.service';
 import { UserDto } from 'src/dtos/UserDto';
 import { LoginDto } from '../../dtos/LoginDto';
@@ -18,6 +18,12 @@ export class ManagementController {
       return res.status(HttpStatus.BAD_REQUEST).send();
     }
     return res.status(HttpStatus.OK).json(response);
+  }
+  @Get('all-users')
+  async result(@Res() res,  ): Promise<any> {
+    const response = await this.managementService.findAll();
+    const jsonResponse = JSON.stringify(response);
+    return res.status(HttpStatus.OK).send(jsonResponse);
   }
 
 }

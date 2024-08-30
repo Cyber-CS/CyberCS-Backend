@@ -10,6 +10,9 @@ export class Search {
   _id: string;
 
   @Prop({ required: true })
+  userId: string;
+
+  @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })
@@ -29,6 +32,9 @@ export class Search {
 
   @Prop()
   response: Result[];
+
+  @Prop()
+  length: number;
 }
 
 export const SearchSchema = SchemaFactory.createForClass(Search);

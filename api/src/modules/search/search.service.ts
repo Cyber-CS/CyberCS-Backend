@@ -82,12 +82,14 @@ export class SearchService {
   async saveSearch(searchDto: SearchDto, results: Result[]): Promise<any> {
     const resultsEncrypted = this.encryptionService.encryptArray(results);
     const search = new this.searchModel({
+      userId: searchDto.userId,
       name: searchDto.name,
       content: searchDto.content,
       filters: ['filter1', 'filter2'],
       registerDate: new Date(),
       frequency: searchDto.frequency,
       response: resultsEncrypted,
+      lenght: results.length,
     });
     const savedSearch = await search.save();
     return savedSearch;
@@ -99,5 +101,20 @@ export class SearchService {
 
   async findById(id: string): Promise<Search> {
     return this.searchModel.findById(id).exec();
+  }
+
+  async searchByUser(userId: string): Promise<any[]> {
+    const data = this.searchModel.find({ userId }).exec();
+    const response = (await data).map((data) => {
+      return {
+        searchId: data._id,
+        name: data.name,
+        content: data.content,
+        length: data.length,
+        registerDate: data.registerDate,
+      };
+    });
+
+    return response;
   }
 }
