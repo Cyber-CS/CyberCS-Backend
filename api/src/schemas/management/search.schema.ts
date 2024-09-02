@@ -24,9 +24,6 @@ export class Search {
   @Prop({ required: true })
   registerDate: Date;
 
-  @Prop({ required: true })
-  frequency: string;
-
   @Prop()
   owner: string;
 

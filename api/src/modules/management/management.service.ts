@@ -42,6 +42,7 @@ export class ManagementService {
               sub: user._id,
               name: user.name,
               role: user.role,
+              email: user.email,
               authorized: true,
             },
             { expiresIn: '1h', secret: process.env.JWT_SECRET },
