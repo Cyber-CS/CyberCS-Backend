@@ -26,4 +26,11 @@ export class SearchController {
     const jsonResponse = JSON.stringify(response);
     return res.status(HttpStatus.OK).send(jsonResponse);
   }
+
+  @Get('results-by-user')
+  async resultsByUser(@Res() res, @Query() query: {userId: string} ): Promise<any> {
+    const response = await this.searchService.searchByUser(query.userId);
+    const jsonResponse = JSON.stringify(response);
+    return res.status(HttpStatus.OK).send(jsonResponse);
+  }
 }

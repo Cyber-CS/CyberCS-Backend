@@ -10,6 +10,9 @@ export class Search {
   _id: string;
 
   @Prop({ required: true })
+  userId: string;
+
+  @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })
@@ -21,14 +24,14 @@ export class Search {
   @Prop({ required: true })
   registerDate: Date;
 
-  @Prop({ required: true })
-  frequency: string;
-
   @Prop()
   owner: string;
 
   @Prop()
   response: Result[];
+
+  @Prop()
+  length: number;
 }
 
 export const SearchSchema = SchemaFactory.createForClass(Search);

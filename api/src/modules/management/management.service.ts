@@ -42,6 +42,7 @@ export class ManagementService {
               sub: user._id,
               name: user.name,
               role: user.role,
+              email: user.email,
               authorized: true,
             },
             { expiresIn: '1h', secret: process.env.JWT_SECRET },
@@ -50,5 +51,17 @@ export class ManagementService {
       }
     }
     return null;
+  }
+  async deleteUser(id: string): Promise<any> {
+    try {
+      const result = await this.userModel.deleteOne({ _id: id }).exec();
+      if (result.deletedCount === 0) {
+        return { deleted: false, message: 'User not found' };
+      }
+      return { deleted: true };
+    } catch (error) {
+      console.error('Erro ao deletar usuário com ID ${id}:', error);
+      throw new Error('Erro ao deletar usuário');
+    }
   }
 }
