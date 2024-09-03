@@ -34,50 +34,50 @@ export class SearchService {
   async search(searchDto: SearchDto): Promise<any> {
     const results: Result[] = [];
 
-    const gitlabUrl = `https://gitlab.com/api/v4/search`;
-    const gitlabOptions = [
-      'blobs',
-      'commits',
-      'issues',
-      'merge_requests',
-      'milestones',
-      'projects',
-      'snippet_titles',
-      'users',
-    ];
+    // const gitlabUrl = `https://gitlab.com/api/v4/search`;
+    // const gitlabOptions = [
+    //   'blobs',
+    //   'commits',
+    //   'issues',
+    //   'merge_requests',
+    //   'milestones',
+    //   'projects',
+    //   'snippet_titles',
+    //   'users',
+    // ];
 
-    gitlabOptions.forEach(async (option) => {
-      const gitlabResponse = await this.httpService
-        .get(gitlabUrl, {
-          headers: {
-            'PRIVATE-TOKEN': this.gitlabApiKEY,
-          },
-          params: {
-            scope: option,
-            search: searchDto.content,
-          },
-        })
-        .pipe(
-          map((response) => {
-            response.data,
-              response.data.forEach((item) => {
-                results.push({
-                  filePath: item.path,
-                  codeContent: item.content,
-                  repositoryName: item.repository.name,
-                  repositoryUrl: item.web_url,
-                  maliciousIntent: [],
-                  foundIn: 'gitlab',
-                });
-              });
-          }),
-        )
-        .toPromise()
-        .catch((err) => {
-          console.error(err);
-          return null;
-        });
-    });
+    // gitlabOptions.forEach(async (option) => {
+    //   const gitlabResponse = await this.httpService
+    //     .get(gitlabUrl, {
+    //       headers: {
+    //         'PRIVATE-TOKEN': this.gitlabApiKEY,
+    //       },
+    //       params: {
+    //         scope: option,
+    //         search: searchDto.content,
+    //       },
+    //     })
+    //     .pipe(
+    //       map((response) => {
+    //         response.data,
+    //           response.data.forEach((item) => {
+    //             results.push({
+    //               filePath: item.path,
+    //               codeContent: item.content,
+    //               repositoryName: item.repository.name,
+    //               repositoryUrl: item.web_url,
+    //               maliciousIntent: [],
+    //               foundIn: 'gitlab',
+    //             });
+    //           });
+    //       }),
+    //     )
+    //     .toPromise()
+    //     .catch((err) => {
+    //       console.error(err);
+    //       return null;
+    //     });
+    // });
 
     // const bitbucketUrl = `https://api.bitbucket.org/2.0/repositories`;
     // const bitbuckeResponse = await this.httpService

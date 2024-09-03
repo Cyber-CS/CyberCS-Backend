@@ -52,4 +52,16 @@ export class ManagementService {
     }
     return null;
   }
+  async deleteUser(id: string): Promise<any> {
+    try {
+      const result = await this.userModel.deleteOne({ _id: id }).exec();
+      if (result.deletedCount === 0) {
+        return { deleted: false, message: 'User not found' };
+      }
+      return { deleted: true };
+    } catch (error) {
+      console.error('Erro ao deletar usuário com ID ${id}:', error);
+      throw new Error('Erro ao deletar usuário');
+    }
+  }
 }
