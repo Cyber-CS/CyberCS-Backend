@@ -57,6 +57,7 @@ def send_email_new_threat_():
     to_email = data.get("to_email")
     user_name = data.get("user_name")
     search_name = data.get("search_name")
+    threats = data.get("threats")
 
     context = {"user_name": user_name, "search_name": search_name}
     html_content = load_template('templates/new_threat.html', context)
