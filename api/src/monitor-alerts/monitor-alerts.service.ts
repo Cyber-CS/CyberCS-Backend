@@ -1,58 +1,102 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AutomaticSearchService } from 'src/modules/automatic-search/automatic-search.service';
+import { EncryptionService } from 'src/modules/encryption/encryption.service';
 import {
   MonitorAlerts,
   MonitorAlertsDocument,
 } from 'src/schemas/monitor-alerts/monitor-alerts.schema';
+import { Result } from 'src/types/Result';
 
 @Injectable()
 export class MonitorAlertsService {
   constructor(
-    private readonly httpService: HttpService,
     private readonly automaticSearchService: AutomaticSearchService,
+    private readonly encryptionService: EncryptionService,
     @InjectModel(MonitorAlerts.name)
     private monitorAlertsModel: Model<MonitorAlertsDocument>,
   ) {}
 
   async checkSearchMonitor(automaticsearchId: string) {
-    const monitorItem = await this.findByAutomaticSearchId(automaticsearchId);
-    const oldData = monitorItem.response;
-    if (monitorItem.isAlive) {
-      const today = new Date();
-      const registerDate = new Date(monitorItem.registerDate);
-      const diffTime = Math.abs(today.getTime() - registerDate.getTime());
-      switch (monitorItem.periodicity) {
-        case 'diary':
-          if (diffTime > 86400000) {
-            const newSearch = this.automaticSearchService.search(monitorItem);
-            if (newSearch !== oldData) {
-              monitorItem.response = newSearch;
-              monitorItem.registerDate = today;
-              await monitorItem.save();
-            }
-            await monitorItem.save();
-          }
-          break;
-        case 'weekly':
-          if (diffTime > 604800000) {
-            monitorItem.isAlive = false;
-            await monitorItem.save();
-          }
-          break;
+    let rawDifferece: string[];
 
-        case 'monthly':
-          if (diffTime > 2628000000) {
-            monitorItem.isAlive = false;
-            await monitorItem.save();
+    const automaticSearchItem =
+      await this.automaticSearchService.findById(automaticsearchId);
+    if (automaticSearchItem.isAlive) {
+      const oldData = automaticSearchItem.response;
+
+      const today = new Date();
+      const registerDate = new Date(automaticSearchItem.registerDate);
+      const diffTime = Math.abs(today.getTime() - registerDate.getTime());
+
+      if (automaticSearchItem.periodicity === 'diary') {
+        if (diffTime > 86400000) {
+          const newSearch = await this.automaticSearchService.search({
+            userId: automaticSearchItem.userId,
+            name: automaticSearchItem.name,
+            content: automaticSearchItem.content,
+            periodicity: automaticSearchItem.periodicity,
+          });
+          if (newSearch.response !== oldData) {
+            rawDifferece = await this.compareResults(oldData, newSearch);
+            if (newSearch.response !== oldData) {
+              this.automaticSearchService.updateSearch(
+                automaticsearchId,
+                newSearch,
+              );
+            }
           }
-          break;
+        }
+      }
+      if (automaticSearchItem.periodicity === 'weekly') {
+        if (diffTime > 604800000) {
+          const newSearch = await this.automaticSearchService.search({
+            userId: automaticSearchItem.userId,
+            name: automaticSearchItem.name,
+            content: automaticSearchItem.content,
+            periodicity: automaticSearchItem.periodicity,
+          });
+
+          if (newSearch.response !== oldData) {
+            rawDifferece = await this.compareResults(oldData, newSearch);
+            if (newSearch.response !== oldData) {
+              this.automaticSearchService.updateSearch(
+                automaticsearchId,
+                newSearch,
+              );
+            }
+          }
+
+          automaticSearchItem.isAlive = false;
+        }
+      }
+
+      if (automaticSearchItem.periodicity === 'monthly') {
+        if (diffTime > 2628000000) {
+          const newSearch = await this.automaticSearchService.search({
+            userId: automaticSearchItem.userId,
+            name: automaticSearchItem.name,
+            content: automaticSearchItem.content,
+            periodicity: automaticSearchItem.periodicity,
+          });
+
+          if (newSearch.response !== oldData) {
+            rawDifferece = await this.compareResults(oldData, newSearch);
+            if (newSearch.response !== oldData) {
+              this.automaticSearchService.updateSearch(
+                automaticsearchId,
+                newSearch,
+              );
+            }
+          }
+
+          automaticSearchItem.isAlive = false;
+        }
       }
     }
-
-    return monitorItem;
+    // await monitorItem.save();
+    // return rawDifferece;
   }
 
   async findByAutomaticSearchId(automaticsearchId: string) {
@@ -61,3 +105,22 @@ export class MonitorAlertsService {
     });
     return monitorAlert;
   }
+
+  async compareResults(oldData: any, newData: any) {
+    const oldDataDecrypted = this.encryptionService.decryptArray(
+      oldData,
+    ) as unknown as Result[];
+    const newDataDecrypted = this.encryptionService.decryptArray(
+      newData,
+    ) as unknown as Result[];
+
+    const oldDataFoundIn = oldDataDecrypted.map((r) => r.foundIn);
+    const newDataFoundIn = newDataDecrypted.map((r) => r.foundIn);
+
+    const difference = newDataFoundIn.filter(
+      (r) => !oldDataFoundIn.includes(r),
+    );
+
+    return difference;
+  }
+}

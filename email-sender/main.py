@@ -35,21 +35,23 @@ def send_email_new_account():
 
     context = {"user_name": user_name, "link": "https://example.com"}
     html_content = load_template('templates/new_account.html', context)
+    msg = MIMEMultipart()
+    msg['From'] = 'cybercs.tcc@gmail.com'
+    msg['To'] = to_email
+    msg['Subject'] = "Bem-vindo ao nosso sistema CyberCS, {}".format(user_name)
+    msg.attach(MIMEText(html_content, 'html'))
     try:
-        msg = MIMEMultipart()
-        msg['From'] = smtp_username
-        msg['To'] = to_email
-        msg['Subject'] = "Bem-vindo ao nosso sistema CyberCS, {}".format(user_name)
-        msg.attach(MIMEText(html_content, 'html'))
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login('cybercs.tcc@gmail.com', "zdcl bffp evuv zavj")  # Realizar login
 
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
-            server.starttls()  
-            server.login(smtp_username, smtp_password) 
-            server.sendmail(smtp_username, to_email, msg.as_string())
-        
+        server.send_message(msg)
         return {"status": "success", "message": "Email enviado com sucesso!"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    finally:
+        server.quit() 
+        
 
 @app.route('/send-email-new-threat', methods=['POST'])
 def send_email_new_threat_():

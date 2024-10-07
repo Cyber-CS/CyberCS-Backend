@@ -155,4 +155,12 @@ export class AutomaticSearchService {
 
     return response;
   }
+
+  async updateSearch(searchId: string, newResponse: Result[]): Promise<any> {
+    const search = await this.automaticSearchModel.findById(searchId).exec();
+    search.response = newResponse;
+    search.length = newResponse.length;
+    await search.save();
+    return search;
+  }
 }

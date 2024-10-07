@@ -26,6 +26,12 @@ export class AutomaticSearch {
 
   @Prop()
   length: number;
+
+  @Prop({ required: true })
+  periodicity: string;
+
+  @Prop({ required: true })
+  isAlive: boolean;
 }
 
 export const AutomaticSearchSchema =

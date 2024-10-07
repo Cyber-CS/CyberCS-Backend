@@ -13,16 +13,10 @@ export class MonitorAlerts {
   userId: string;
 
   @Prop({ required: true })
-  periodicity: string;
-
-  @Prop({ required: true })
   registerDate: Date;
 
   @Prop({ required: true })
   response: Result[];
-
-  @Prop({ required: true })
-  isAlive: boolean;
 }
 
 export const MonitorAlertsSchema = SchemaFactory.createForClass(MonitorAlerts);
