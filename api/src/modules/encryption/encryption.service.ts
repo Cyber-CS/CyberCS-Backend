@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as CryptoJS from 'crypto-js';
-import { Result } from '../search/search.service';
+import { Result } from 'src/types/Result';
 
 @Injectable()
 export class EncryptionService {

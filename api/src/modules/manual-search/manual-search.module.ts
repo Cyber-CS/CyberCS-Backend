@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
-import { SearchController } from './search.controller';
-import { SearchService } from './search.service';
+import { SearchController } from './manual-search.controller';
+import { ManualSearchService } from './manual-search.service';
 import { HttpModule } from '@nestjs/axios';
 import { MaliciousIntentModule } from 'src/modules/malicious-intent/malicious-intent.module';
 import { MaliciousIntentService } from 'src/modules/malicious-intent/malicious-intent.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Search, SearchSchema } from 'src/schemas/management/search.schema';
+import {
+  ManualSearch,
+  SearchSchema,
+} from 'src/schemas/management/manual-search.schema';
 import { EncryptionModule } from '../encryption/encryption.module';
 import { EncryptionService } from '../encryption/encryption.service';
 
@@ -14,9 +17,11 @@ import { EncryptionService } from '../encryption/encryption.service';
     HttpModule,
     MaliciousIntentModule,
     EncryptionModule,
-    MongooseModule.forFeature([{ name: Search.name, schema: SearchSchema }]),
+    MongooseModule.forFeature([
+      { name: ManualSearch.name, schema: SearchSchema },
+    ]),
   ],
   controllers: [SearchController],
-  providers: [SearchService, MaliciousIntentService,EncryptionService],
+  providers: [ManualSearchService, MaliciousIntentService, EncryptionService],
 })
 export class SearchModule {}

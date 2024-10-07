@@ -1,6 +1,5 @@
-export class SearchDto {
+export class ManualSearchDto {
     readonly userId: string;
     readonly name: string;
     readonly content: string;
-    // readonly filters: string[]; // implementar depois
 }

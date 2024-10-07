@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Result } from 'src/modules/search/search.service';
+import { Result } from 'src/types/Result';
 import { v4 as uuidv4 } from 'uuid';
-export type SearchDocument = Search & Document;
+export type ManualSearchDocument = ManualSearch & Document;
 
 @Schema()
-export class Search {
+export class ManualSearch {
   @Prop({ default: uuidv4 })
   _id: string;
 
@@ -18,14 +18,8 @@ export class Search {
   @Prop({ required: true })
   content: string;
 
-  @Prop()
-  filters: string[];
-
   @Prop({ required: true })
   registerDate: Date;
-
-  @Prop()
-  owner: string;
 
   @Prop()
   response: Result[];
@@ -34,4 +28,4 @@ export class Search {
   length: number;
 }
 
-export const SearchSchema = SchemaFactory.createForClass(Search);
+export const SearchSchema = SchemaFactory.createForClass(ManualSearch);
