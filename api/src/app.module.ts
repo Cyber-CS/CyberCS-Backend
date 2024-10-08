@@ -8,6 +8,9 @@ import * as dotenv from 'dotenv';
 import { ManagementModule } from './modules/management/management.module';
 import { EncryptionService } from './modules/encryption/encryption.service';
 import { EncryptionModule } from './modules/encryption/encryption.module';
+import { VirusTotalModule } from './modules/virustotal/virustotal.module'; 
+import { HIBPModule } from './modules/hibp/hibp.module';
+import { EmpresaModule } from './modules/Empresa/empresa.module';
 
 dotenv.config();
 const envDB = process.env.DB_MONGO;
@@ -18,6 +21,9 @@ const envDB = process.env.DB_MONGO;
     MongooseModule.forRoot(envDB),
     ManagementModule,
     EncryptionModule,
+    VirusTotalModule,
+    HIBPModule,
+    EmpresaModule,
   ],
   controllers: [AppController],
   providers: [AppService, EncryptionService],
