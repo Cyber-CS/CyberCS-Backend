@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -12,45 +13,38 @@ import { Result } from 'src/types/Result';
 @Injectable()
 export class MonitorAlertsService {
   constructor(
+    private readonly httpService: HttpService,
     private readonly automaticSearchService: AutomaticSearchService,
     private readonly encryptionService: EncryptionService,
     @InjectModel(MonitorAlerts.name)
     private monitorAlertsModel: Model<MonitorAlertsDocument>,
   ) {}
 
-  async checkSearchMonitor(automaticsearchId: string) {
-    let rawDifferece: string[];
+  async checkSearchMonitor(userId: string) {
+    const alertsResponse = [];
 
-    const automaticSearchItem =
-      await this.automaticSearchService.findById(automaticsearchId);
-    if (automaticSearchItem.isAlive) {
-      const oldData = automaticSearchItem.response;
+    const allAutomaticSearches =
+      await this.automaticSearchService.findAllByUserId(userId);
+    allAutomaticSearches.forEach(async (automaticSearch) => {
+      const automaticSearchItem = await this.automaticSearchService.findById(
+        automaticSearch._id,
+      );
+      if (automaticSearchItem.isAlive) {
+        let rawDifference: Result[] = [];
+        const oldData = automaticSearchItem.response;
 
-      const today = new Date();
-      const registerDate = new Date(automaticSearchItem.registerDate);
-      const diffTime = Math.abs(today.getTime() - registerDate.getTime());
+        const today = new Date();
+        const registerDate = new Date(automaticSearchItem.registerDate);
+        const diffTime = Math.abs(today.getTime() - registerDate.getTime());
 
-      if (automaticSearchItem.periodicity === 'diary') {
-        if (diffTime > 86400000) {
-          const newSearch = await this.automaticSearchService.search({
-            userId: automaticSearchItem.userId,
-            name: automaticSearchItem.name,
-            content: automaticSearchItem.content,
-            periodicity: automaticSearchItem.periodicity,
-          });
-          if (newSearch.response !== oldData) {
-            rawDifferece = await this.compareResults(oldData, newSearch);
-            if (newSearch.response !== oldData) {
-              this.automaticSearchService.updateSearch(
-                automaticsearchId,
-                newSearch,
-              );
-            }
-          }
-        }
-      }
-      if (automaticSearchItem.periodicity === 'weekly') {
-        if (diffTime > 604800000) {
+        if (
+          (automaticSearchItem.periodicity === 'diary' &&
+            diffTime > 86400000) ||
+          (automaticSearchItem.periodicity === 'weekly' &&
+            diffTime > 604800000) ||
+          (automaticSearchItem.periodicity === 'monthly' &&
+            diffTime > 2628000000)
+        ) {
           const newSearch = await this.automaticSearchService.search({
             userId: automaticSearchItem.userId,
             name: automaticSearchItem.name,
@@ -58,45 +52,42 @@ export class MonitorAlertsService {
             periodicity: automaticSearchItem.periodicity,
           });
 
-          if (newSearch.response !== oldData) {
-            rawDifferece = await this.compareResults(oldData, newSearch);
-            if (newSearch.response !== oldData) {
-              this.automaticSearchService.updateSearch(
-                automaticsearchId,
-                newSearch,
-              );
-            }
+          rawDifference = await this.compareResults(oldData, newSearch);
+          if (rawDifference.length > 0) {
+            this.automaticSearchService.updateSearch(
+              automaticSearch._id,
+              newSearch,
+            );
+            await this.monitorAlertsModel.create({
+              automaticsearchId: automaticSearch._id,
+              userId: automaticSearchItem.userId,
+              response: rawDifference,
+              registerDate: new Date(),
+            });
+
+            const monitorAlertSaved = await this.saveMonitorAlert({
+              automaticsearchId: automaticSearch._id,
+              userId: automaticSearchItem.userId,
+              response: rawDifference,
+              registerDate: new Date(),
+            });
+
+            await this.httpService.post(
+              'http://localhost:3000/send-email-new-threat',
+              {
+                userId: automaticSearchItem.userId,
+                user_name: automaticSearchItem.name,
+                search_name: automaticSearchItem.content,
+                threats: rawDifference,
+              },
+            );
+
+            alertsResponse.push(monitorAlertSaved);
           }
-
-          automaticSearchItem.isAlive = false;
         }
+        return alertsResponse;
       }
-
-      if (automaticSearchItem.periodicity === 'monthly') {
-        if (diffTime > 2628000000) {
-          const newSearch = await this.automaticSearchService.search({
-            userId: automaticSearchItem.userId,
-            name: automaticSearchItem.name,
-            content: automaticSearchItem.content,
-            periodicity: automaticSearchItem.periodicity,
-          });
-
-          if (newSearch.response !== oldData) {
-            rawDifferece = await this.compareResults(oldData, newSearch);
-            if (newSearch.response !== oldData) {
-              this.automaticSearchService.updateSearch(
-                automaticsearchId,
-                newSearch,
-              );
-            }
-          }
-
-          automaticSearchItem.isAlive = false;
-        }
-      }
-    }
-    // await monitorItem.save();
-    // return rawDifferece;
+    });
   }
 
   async findByAutomaticSearchId(automaticsearchId: string) {
@@ -106,7 +97,7 @@ export class MonitorAlertsService {
     return monitorAlert;
   }
 
-  async compareResults(oldData: any, newData: any) {
+  async compareResults(oldData: any, newData: any): Promise<Result[]> {
     const oldDataDecrypted = this.encryptionService.decryptArray(
       oldData,
     ) as unknown as Result[];
@@ -114,13 +105,17 @@ export class MonitorAlertsService {
       newData,
     ) as unknown as Result[];
 
-    const oldDataFoundIn = oldDataDecrypted.map((r) => r.foundIn);
-    const newDataFoundIn = newDataDecrypted.map((r) => r.foundIn);
-
-    const difference = newDataFoundIn.filter(
-      (r) => !oldDataFoundIn.includes(r),
+    const newResults = newDataDecrypted.filter(
+      (newResult) =>
+        !oldDataDecrypted.some(
+          (oldResult) => oldResult.codeContent === newResult.codeContent,
+        ),
     );
 
-    return difference;
+    return newResults;
+  }
+
+  async saveMonitorAlert(monitorAlert: Omit<MonitorAlerts, '_id'>) {
+    return this.monitorAlertsModel.create(monitorAlert);
   }
 }

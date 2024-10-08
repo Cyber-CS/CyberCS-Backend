@@ -163,4 +163,8 @@ export class AutomaticSearchService {
     await search.save();
     return search;
   }
+
+  async findAllByUserId(userId: string): Promise<AutomaticSearch[]> {
+    return this.automaticSearchModel.find({ userId }).exec();
+  }
 }

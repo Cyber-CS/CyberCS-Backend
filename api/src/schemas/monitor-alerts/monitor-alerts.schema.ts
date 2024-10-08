@@ -10,6 +10,9 @@ export class MonitorAlerts {
   _id: string;
 
   @Prop({ required: true })
+  automaticsearchId: string;
+
+  @Prop({ required: true })
   userId: string;
 
   @Prop({ required: true })

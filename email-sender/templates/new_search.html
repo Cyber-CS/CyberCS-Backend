@@ -3,11 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      table, th, td {
+        border: 1px solid #ddd;
+      }
+      th, td {
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+    </style>
   </head>
   <body>
-    <h1>Olá, {user_name}.</h1>
-    <p>Recentemente, você fez uma nova pesquisa manual, a "{search_name}".</p>
+    <h1>Olá, {{ user_name }}.</h1>
+    <p>Recentemente, você fez uma nova pesquisa manual, a "{{ search_name }}".</p>
     <h3>Aqui estão os principais resultados de sua busca:</h3>
-    <!-- <p>{content}</p> -->
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Link de arquivo</th>
+          <th>Nome do repositório</th>
+          <th>Ameaças encontradas</th>
+          <th>Encontrado em</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in results %}
+        <tr>
+          <td><a href="{{ result.file_link }}">Arquivo</a></td>
+          <td>{{ result.repo_name }}</td>
+          <td>{{ result.threats }}</td>
+          <td>{{ result.found_in }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </body>
 </html>
