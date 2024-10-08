@@ -1,6 +1,6 @@
-export class ManualSearchDto {
+export class SaveSearchDto {
   readonly userId: string;
   readonly name: string;
   readonly content: string;
-  static userId: string;
+  readonly results: string[];
 }

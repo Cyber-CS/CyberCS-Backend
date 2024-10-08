@@ -8,6 +8,9 @@ import * as dotenv from 'dotenv';
 import { ManagementModule } from './modules/management/management.module';
 import { EncryptionService } from './modules/encryption/encryption.service';
 import { EncryptionModule } from './modules/encryption/encryption.module';
+import { VirusTotalModule } from './modules/virustotal/virustotal.module';
+import { HIBPModule } from './modules/hibp/hibp.module';
+import { EmpresaModule } from './modules/Empresa/empresa.module';
 import { AutomaticSearchModule } from './modules/automatic-search/automatic-search.module';
 import { AutomaticSearchService } from './modules/automatic-search/automatic-search.service';
 import { HttpModule } from '@nestjs/axios';
@@ -24,6 +27,9 @@ const envDB = process.env.DB_MONGO;
     ManagementModule,
     MaliciousIntentModule,
     EncryptionModule,
+    VirusTotalModule,
+    HIBPModule,
+    EmpresaModule,
     HttpModule,
     MonitorAlertsModule,
   ],
